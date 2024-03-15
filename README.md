@@ -55,7 +55,7 @@ put_header(request, "tl-signature", tl_signature)
 ### Verify a request signature
 
 ```elixir
-request = %ExTrueLayerSigning.Request{
+signed_request = %ExTrueLayerSigning.Request{
   method: :post,
   path: "/mandates",
   body: Jason.encode!(%{"foo" => "bar"}),

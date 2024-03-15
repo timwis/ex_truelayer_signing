@@ -16,8 +16,14 @@ defmodule ExTrueLayerSigning do
 
   ## Examples
 
-      iex> ExTrueLayerSigning.sign(request)
-      {:ok, tl_signature}
+      request = %ExTrueLayerSigning.Request{
+        method: :post,
+        path: "/mandates",
+        body: Jason.encode!(%{"foo" => "bar"}),
+        headers: [{"Idempotency-Key", "123"}]
+      }
+
+      {:ok, tl_signature} = ExTrueLayerSigning.sign(request)
 
   """
   def sign(%Request{} = request, opts \\ []) do
@@ -43,11 +49,18 @@ defmodule ExTrueLayerSigning do
 
   ## Examples
 
-    iex> ExTrueLayerSigning.verify(signed_request)
-    :ok
+      signed_request = %ExTrueLayerSigning.Request{
+        method: :post,
+        path: "/mandates",
+        body: Jason.encode!(%{"foo" => "bar"}),
+        headers: [
+          {"Idempotency-Key", "123"},
+          {"tl-signature", "eyJhbGciOiJFUzUxM..."}
+        ]
+      }
+      :ok = ExTrueLayerSigning.verify(signed_request)
 
-    iex> ExTrueLayerSigning.verify(invalid_request)
-    {:error, ...}
+      {:error, ...} = ExTrueLayerSigning.verify(invalid_request)
 
   """
   def verify(%Request{} = request, opts \\ []) do
@@ -131,7 +144,7 @@ defmodule ExTrueLayerSigning do
     end
   end
 
-  def delete_header(%Request{} = request, key) when is_binary(key) do
+  defp delete_header(%Request{} = request, key) when is_binary(key) do
     headers = for {k, v} <- request.headers, k != key, do: {k, v}
     %{request | headers: headers}
   end
